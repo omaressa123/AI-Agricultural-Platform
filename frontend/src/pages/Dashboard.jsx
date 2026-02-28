@@ -4,34 +4,35 @@ import EfficiencyGauge from '../components/EfficiencyGauge';
 import PriceTrendChart from '../components/Charts/PriceTrendChart';
 import YieldChart from '../components/Charts/YieldChart';
 import InsightsPanel from '../components/InsightsPanel';
+import ConnectionTest from '../components/ConnectionTest';
 
 const Dashboard = () => {
   const [selectedFarm, setSelectedFarm] = useState('Farm A');
 
   const kpiData = [
     {
-      title: 'Recommended Crop',
+      title: 'Best Crop Match',
       value: 'Wheat',
       icon: Wheat,
       color: 'bg-secondary',
       textColor: 'text-white',
-      unit: '',
+      unit: '92% suitable',
     },
     {
-      title: 'Predicted Yield',
+      title: 'Expected Production',
       value: '23.4',
       icon: TrendingUp,
       color: 'bg-accent',
       textColor: 'text-white',
-      unit: 'ton/ha',
+      unit: 'tons per hectare',
     },
     {
-      title: 'Revenue',
-      value: '198,900',
+      title: 'Expected Revenue',
+      value: '190,000',
       icon: DollarSign,
       color: 'bg-warning',
       textColor: 'text-white',
-      unit: 'EGP',
+      unit: 'EGP per hectare',
     },
     {
       title: 'Efficiency Score',
@@ -39,7 +40,7 @@ const Dashboard = () => {
       icon: Target,
       color: 'bg-primary',
       textColor: 'text-white',
-      unit: '',
+      unit: 'Above average',
     },
   ];
 
@@ -97,10 +98,11 @@ const Dashboard = () => {
           <InsightsPanel />
         </div>
         <div>
-          <div className="card">
+          <div className="card mb-6">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Efficiency Overview</h3>
             <EfficiencyGauge efficiency={0.82} size={180} />
           </div>
+          <ConnectionTest />
         </div>
       </div>
     </div>

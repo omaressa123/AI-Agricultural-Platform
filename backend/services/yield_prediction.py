@@ -22,12 +22,30 @@ class YieldPredictionService:
         """Load the trained yield prediction pipeline"""
         try:
             model_path = os.path.join(os.path.dirname(__file__), '..', '..', 'model', 'yield_prediction_pipeline.pkl')
+            
+            # Try to load with joblib
             self.pipeline = joblib.load(model_path)
-            self.model = self.pipeline.named_steps['model']
-            self.preprocessor = self.pipeline.named_steps['preprocessor']
-            print("✅ Yield prediction model loaded successfully")
+            
+            # Handle different sklearn versions safely
+            try:
+                if hasattr(self.pipeline, 'named_steps'):
+                    self.model = self.pipeline.named_steps['model']
+                    self.preprocessor = self.pipeline.named_steps['preprocessor']
+                else:
+                    # For newer sklearn versions or different pipeline formats
+                    self.model = self.pipeline
+                    self.preprocessor = None
+                print("✅ Yield prediction model loaded successfully")
+            except AttributeError as ae:
+                print(f"⚠️ Pipeline structure changed: {ae}")
+                # Use the pipeline as a whole if we can't extract components
+                self.model = self.pipeline
+                self.preprocessor = None
+                print("✅ Using pipeline as whole model")
+                
         except Exception as e:
             print(f"⚠️ Could not load yield prediction model: {e}")
+            print("🔄 Using fallback prediction method")
             self.pipeline = None
             self.model = None
             self.preprocessor = None

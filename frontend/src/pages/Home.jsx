@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Sprout, TrendingUp } from 'lucide-react';
+import { ArrowRight, BarChart3, Sprout, TrendingUp, Target, Brain } from 'lucide-react';
 
 const Home = () => {
   return (
@@ -32,14 +32,14 @@ const Home = () => {
       </div>
 
       {/* Features Grid */}
-      <div className="grid md:grid-cols-3 gap-8 mb-16">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         <div className="card text-center">
           <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
             <BarChart3 className="text-white" size={32} />
           </div>
-          <h3 className="text-xl font-semibold mb-3">Smart Analytics</h3>
+          <h3 className="text-xl font-semibold mb-3">Best Crop Selection</h3>
           <p className="text-gray-600">
-            Get real-time insights into your farm's performance with advanced AI-powered analytics.
+            AI analyzes your soil and climate to recommend the perfect crop, preventing planting failures.
           </p>
         </div>
 
@@ -47,9 +47,9 @@ const Home = () => {
           <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
             <Sprout className="text-white" size={32} />
           </div>
-          <h3 className="text-xl font-semibold mb-3">Yield Optimization</h3>
+          <h3 className="text-xl font-semibold mb-3">Production Forecast</h3>
           <p className="text-gray-600">
-            Maximize your crop yields with personalized recommendations based on soil, weather, and market data.
+            Know exactly how many tons to expect - eliminate surprises and plan your harvest with confidence.
           </p>
         </div>
 
@@ -57,9 +57,29 @@ const Home = () => {
           <div className="w-16 h-16 bg-warning rounded-full flex items-center justify-center mx-auto mb-4">
             <TrendingUp className="text-white" size={32} />
           </div>
-          <h3 className="text-xl font-semibold mb-3">Market Predictions</h3>
+          <h3 className="text-xl font-semibold mb-3">Revenue Prediction</h3>
           <p className="text-gray-600">
-            Stay ahead of market trends with accurate price predictions and revenue forecasts.
+            Calculate expected earnings (190,000 EGP/hectare) and plan your finances accurately.
+          </p>
+        </div>
+
+        <div className="card text-center">
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <Target className="text-white" size={32} />
+          </div>
+          <h3 className="text-xl font-semibold mb-3">Efficiency Measurement</h3>
+          <p className="text-gray-600">
+            Detect water waste, fertilizer overuse, and get your efficiency score to optimize resources.
+          </p>
+        </div>
+
+        <div className="card text-center">
+          <div className="w-16 h-16 bg-danger rounded-full flex items-center justify-center mx-auto mb-4">
+            <Brain className="text-white" size={32} />
+          </div>
+          <h3 className="text-xl font-semibold mb-3">Practical Recommendations</h3>
+          <p className="text-gray-600">
+            Actionable advice: "Reduce water 8%, add nitrogen, wait for better market prices."
           </p>
         </div>
       </div>

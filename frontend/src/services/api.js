@@ -1,6 +1,6 @@
 // API service for the AI Agricultural Platform
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 class ApiService {
   // Farm Management
@@ -90,13 +90,19 @@ class ApiService {
     }
   }
 
-  // Weather Data
-  static async getWeatherData(location) {
+  // Complete Farmer Workflow
+  static async runFarmerWorkflow(farmData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/weather?location=${location}`);
+      const response = await fetch(`${API_BASE_URL}/api/farmer-workflow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(farmData),
+      });
       return await response.json();
     } catch (error) {
-      console.error('Error fetching weather data:', error);
+      console.error('Error running farmer workflow:', error);
       throw error;
     }
   }

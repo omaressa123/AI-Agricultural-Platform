@@ -7,14 +7,20 @@ import {
   TrendingUp, 
   User, 
   Plus, 
-  History, 
-  Settings,
+  History as HistoryIcon, 
+  Settings as SettingsIcon,
   Menu,
   X
 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import AddFarm from './pages/AddFarm';
+import Workflow from './pages/Workflow';
+import Farms from './pages/Farms';
+import Insights from './pages/Insights';
+import Profile from './pages/Profile';
+import History from './pages/History';
+import Settings from './pages/Settings';
 
 function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,8 +35,8 @@ function Layout({ children }) {
 
   const sidebarActions = [
     { name: 'Add Farm', href: '/add-farm', icon: Plus },
-    { name: 'Farm History', href: '/history', icon: History },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Farm History', href: '/history', icon: HistoryIcon },
+    { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
 
   return (
@@ -128,6 +134,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add-farm" element={<AddFarm />} />
+          <Route path="/workflow" element={<Workflow />} />
+          <Route path="/farms" element={<Farms />} />
+          <Route path="/insights" element={<Insights />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
     </Router>

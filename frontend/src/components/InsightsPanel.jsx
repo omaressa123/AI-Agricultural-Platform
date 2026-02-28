@@ -1,31 +1,43 @@
 import React from 'react';
-import { Brain, AlertCircle, CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Brain, AlertCircle, CheckCircle, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react';
 
 const InsightsPanel = ({ insights = [] }) => {
   const defaultInsights = [
     {
       type: 'success',
       icon: CheckCircle,
-      title: 'Nitrogen Level Optimal',
-      description: 'Current nitrogen levels are perfect for wheat cultivation',
+      title: 'Best Crop Match: Wheat',
+      description: 'Based on your soil pH 6.5 and climate, wheat is 92% suitable for your farm',
     },
     {
       type: 'warning',
       icon: AlertTriangle,
-      title: 'Reduce Water by 7%',
-      description: 'Current water usage exceeds optimal levels by 7%',
+      title: 'Reduce Water by 8%',
+      description: 'Current water usage exceeds optimal levels by 8% - save 15,000 EGP',
     },
     {
       type: 'success',
       icon: TrendingUp,
-      title: 'Market Trend Increasing',
-      description: 'Wheat prices expected to rise 12% in next quarter',
+      title: 'Market Price Rising',
+      description: 'Wheat prices expected to rise 12% in next quarter - wait for better rates',
     },
     {
       type: 'info',
       icon: Brain,
-      title: 'Efficiency Above Regional Average',
-      description: 'Your farm efficiency is 15% higher than regional average',
+      title: 'Add 20kg Nitrogen',
+      description: 'Soil analysis shows nitrogen deficiency - add 20kg per hectare for optimal yield',
+    },
+    {
+      type: 'success',
+      icon: DollarSign,
+      title: 'Expected Revenue: 190,000 EGP',
+      description: 'Based on 23.4 tons/ha yield at current market prices',
+    },
+    {
+      type: 'warning',
+      icon: AlertCircle,
+      title: 'Fertilizer Waste Detected',
+      description: '30% fertilizer waste - consider precision application methods',
     },
   ];
 

@@ -30,6 +30,34 @@ class ApiService {
     }
   }
 
+  static async updateFarm(farmId, farmData) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(farmData),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating farm:', error);
+      throw error;
+    }
+  }
+
+  static async deleteFarm(farmId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}`, {
+        method: 'DELETE',
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting farm:', error);
+      throw error;
+    }
+  }
+
   // Prediction API
   static async predictYield(farmData) {
     try {

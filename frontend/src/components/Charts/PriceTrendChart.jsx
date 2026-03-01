@@ -2,32 +2,39 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const PriceTrendChart = ({ data = [] }) => {
-  const defaultData = [
-    { month: 'Jan', price: 1800 },
-    { month: 'Feb', price: 1850 },
-    { month: 'Mar', price: 1900 },
-    { month: 'Apr', price: 1950 },
-    { month: 'May', price: 2100 },
-    { month: 'Jun', price: 2200 },
-    { month: 'Jul', price: 2150 },
-    { month: 'Aug', price: 2300 },
-  ];
-
-  const chartData = data.length > 0 ? data : defaultData;
+  // Transform API data to chart format
+  const chartData = data.map(item => ({
+    month: new Date(item.date).toLocaleDateString('en', { month: 'short' }),
+    price: item.price_per_ton,
+    crop: item.crop
+  }));
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      const data = payload[0].payload;
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold text-gray-900">{label}</p>
+          <p className="font-semibold text-gray-900">{data.crop}</p>
+          <p className="text-sm text-gray-600">{label}</p>
           <p className="text-primary font-semibold">
-            EGP {payload[0].value.toLocaleString()}
+            EGP {data.price.toLocaleString()}
           </p>
         </div>
       );
     }
     return null;
   };
+
+  if (chartData.length === 0) {
+    return (
+      <div className="card">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900">Market Price Trend</h3>
+        <div className="flex items-center justify-center h-64 text-gray-500">
+          No price data available
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card">

@@ -30,20 +30,16 @@ class MarketPriceService:
         }
     
     def load_price_data(self):
-        """Load market price data from CSV file"""
+        """Load market price data"""
         try:
-            price_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'egypt_local_crop_prices_2023_2025.csv')
-            if os.path.exists(price_path):
-                self.price_data = pd.read_csv(price_path)
-                self.price_data['Date'] = pd.to_datetime(self.price_data['Date'])
-                self._calculate_price_features()
-                print("✅ Market price data loaded successfully")
-            else:
-                print("⚠️ Market price data file not found")
-                self._create_sample_data()
+            data_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'egypt_local_crop_prices_2023_2025.csv')
+            self.price_data = pd.read_csv(data_path)
+            self.price_data['Date'] = pd.to_datetime(self.price_data['Date'])
+            print("✅ Market price data loaded successfully")
         except Exception as e:
-            print(f"Error loading price data: {e}")
-            self._create_sample_data()
+            print(f"⚠️ Could not load market price data: {e}")
+            # Create fallback data
+            self.price_data = self._create_fallback_data()
     
     def _create_sample_data(self):
         """Create sample price data when real data is not available"""

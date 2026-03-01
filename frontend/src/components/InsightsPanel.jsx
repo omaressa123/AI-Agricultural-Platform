@@ -1,47 +1,101 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Brain, AlertCircle, CheckCircle, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react';
 
-const InsightsPanel = ({ insights = [] }) => {
-  const defaultInsights = [
-    {
-      type: 'success',
-      icon: CheckCircle,
-      title: 'Best Crop Match: Wheat',
-      description: 'Based on your soil pH 6.5 and climate, wheat is 92% suitable for your farm',
-    },
-    {
-      type: 'warning',
-      icon: AlertTriangle,
-      title: 'Reduce Water by 8%',
-      description: 'Current water usage exceeds optimal levels by 8% - save 15,000 EGP',
-    },
-    {
-      type: 'success',
-      icon: TrendingUp,
-      title: 'Market Price Rising',
-      description: 'Wheat prices expected to rise 12% in next quarter - wait for better rates',
-    },
-    {
-      type: 'info',
-      icon: Brain,
-      title: 'Add 20kg Nitrogen',
-      description: 'Soil analysis shows nitrogen deficiency - add 20kg per hectare for optimal yield',
-    },
-    {
-      type: 'success',
-      icon: DollarSign,
-      title: 'Expected Revenue: 190,000 EGP',
-      description: 'Based on 23.4 tons/ha yield at current market prices',
-    },
-    {
-      type: 'warning',
-      icon: AlertCircle,
-      title: 'Fertilizer Waste Detected',
-      description: '30% fertilizer waste - consider precision application methods',
-    },
-  ];
+const InsightsPanel = ({ farmId }) => {
+  const [insights, setInsights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const insightsData = insights.length > 0 ? insights : defaultInsights;
+  useEffect(() => {
+    if (farmId) {
+      fetchInsights(farmId);
+    }
+  }, [farmId]);
+
+  const fetchInsights = async (farmId) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/farms/${farmId}/predictions`);
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        // Transform prediction data into insights
+        const insightsData = transformPredictionsToInsights(result.data);
+        setInsights(insightsData);
+      } else {
+        setError('Failed to fetch insights');
+      }
+    } catch (err) {
+      setError('Error fetching insights');
+      console.error('Error fetching insights:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformPredictionsToInsights = (predictions) => {
+    if (!predictions || predictions.length === 0) {
+      return [];
+    }
+
+    const latestPrediction = predictions[0];
+    const insights = [];
+
+    // Crop recommendation insight
+    if (latestPrediction.recommendations && latestPrediction.recommendations.length > 0) {
+      insights.push({
+        type: 'success',
+        icon: CheckCircle,
+        title: `Best Crop Match: ${latestPrediction.recommendations[0]}`,
+        description: `Based on your soil pH ${latestPrediction.ph || 'N/A'} and climate conditions`,
+      });
+    }
+
+    // Yield insight
+    if (latestPrediction.predicted_yield) {
+      insights.push({
+        type: 'success',
+        icon: TrendingUp,
+        title: `Expected Yield: ${latestPrediction.predicted_yield.toFixed(1)} tons/hectare`,
+        description: 'Based on current soil and weather conditions',
+      });
+    }
+
+    // Revenue insight
+    if (latestPrediction.predicted_revenue) {
+      insights.push({
+        type: 'success',
+        icon: DollarSign,
+        title: `Expected Revenue: ${latestPrediction.predicted_revenue.toLocaleString()} EGP`,
+        description: 'Based on predicted yield and current market prices',
+      });
+    }
+
+    // Efficiency insight
+    if (latestPrediction.efficiency_score) {
+      const efficiencyLevel = latestPrediction.efficiency_score > 0.7 ? 'Excellent' : 
+                           latestPrediction.efficiency_score > 0.5 ? 'Good' : 'Needs Improvement';
+      
+      insights.push({
+        type: latestPrediction.efficiency_score > 0.5 ? 'success' : 'warning',
+        icon: latestPrediction.efficiency_score > 0.5 ? CheckCircle : AlertTriangle,
+        title: `Farm Efficiency: ${efficiencyLevel}`,
+        description: `Efficiency score: ${(latestPrediction.efficiency_score * 100).toFixed(1)}%`,
+      });
+    }
+
+    // Water usage insight (if data available)
+    if (latestPrediction.rainfall) {
+      insights.push({
+        type: 'info',
+        icon: Brain,
+        title: 'Rainfall Analysis',
+        description: `Current rainfall: ${latestPrediction.rainfall}mm - conditions are ${latestPrediction.rainfall > 100 ? 'favorable' : 'dry'}`,
+      });
+    }
+
+    return insights;
+  };
 
   const getTypeStyles = (type) => {
     switch (type) {
@@ -76,37 +130,71 @@ const InsightsPanel = ({ insights = [] }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="flex items-center space-x-2 mb-4">
+          <Brain className="text-primary" size={24} />
+          <h3 className="text-lg font-semibold text-gray-900">AI Recommendations</h3>
+        </div>
+        <div className="flex items-center justify-center h-32 text-gray-500">
+          Loading insights...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <div className="flex items-center space-x-2 mb-4">
+          <Brain className="text-primary" size={24} />
+          <h3 className="text-lg font-semibold text-gray-900">AI Recommendations</h3>
+        </div>
+        <div className="flex items-center justify-center h-32 text-red-500">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card">
       <div className="flex items-center space-x-2 mb-4">
         <Brain className="text-primary" size={24} />
         <h3 className="text-lg font-semibold text-gray-900">AI Recommendations</h3>
       </div>
-      <div className="space-y-3">
-        {insightsData.map((insight, index) => {
-          const styles = getTypeStyles(insight.type);
-          const Icon = insight.icon;
-          
-          return (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border ${styles.bgColor} ${styles.borderColor}`}
-            >
-              <div className="flex items-start space-x-3">
-                <Icon className={`${styles.iconColor} mt-0.5`} size={20} />
-                <div className="flex-1">
-                  <h4 className={`font-semibold ${styles.textColor} mb-1`}>
-                    {insight.title}
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    {insight.description}
-                  </p>
+      {insights.length === 0 ? (
+        <div className="flex items-center justify-center h-32 text-gray-500">
+          No insights available
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {insights.map((insight, index) => {
+            const styles = getTypeStyles(insight.type);
+            const Icon = insight.icon;
+            
+            return (
+              <div
+                key={index}
+                className={`p-4 rounded-lg border ${styles.bgColor} ${styles.borderColor}`}
+              >
+                <div className="flex items-start space-x-3">
+                  <Icon className={`${styles.iconColor} mt-0.5`} size={20} />
+                  <div className="flex-1">
+                    <h4 className={`font-semibold ${styles.textColor} mb-1`}>
+                      {insight.title}
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {insight.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

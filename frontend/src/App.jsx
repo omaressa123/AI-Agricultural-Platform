@@ -131,7 +131,7 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home/>} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add-farm" element={<AddFarm />} />
           <Route path="/workflow" element={<Workflow />} />

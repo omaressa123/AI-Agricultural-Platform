@@ -1,48 +1,126 @@
-import React, { useState } from 'react';
-import { Plus, Search, Filter, MapPin, Calendar, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Filter, MapPin, Calendar, TrendingUp, Edit, Trash2, Eye } from 'lucide-react';
+import ApiService from '../services/api';
 
-const Farms = () => {
-  const [farms, setFarms] = useState([
-    {
-      id: 1,
-      name: 'Farm A - Wheat Field',
-      location: 'Nile Delta',
-      area: 10,
-      crop: 'Wheat',
-      status: 'Active',
-      lastAnalysis: '2024-02-27',
-      efficiency: 0.82,
-      expectedYield: 23.4,
-      expectedRevenue: 190000
-    },
-    {
-      id: 2,
-      name: 'Farm B - Corn Field',
-      location: 'Alexandria',
-      area: 15,
-      crop: 'Corn',
-      status: 'Active',
-      lastAnalysis: '2024-02-26',
-      efficiency: 0.75,
-      expectedYield: 18.2,
-      expectedRevenue: 145000
-    },
-    {
-      id: 3,
-      name: 'Farm C - Vegetable Garden',
-      location: 'Giza',
-      area: 5,
-      crop: 'Mixed Vegetables',
-      status: 'Planning',
-      lastAnalysis: '2024-02-25',
-      efficiency: 0.68,
-      expectedYield: 12.5,
-      expectedRevenue: 95000
-    }
-  ]);
-
+const FarmsDynamic = () => {
+  const [farms, setFarms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingFarm, setEditingFarm] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    area_hectares: '',
+    crop_type: '',
+    soil_type: '',
+    irrigation_type: ''
+  });
+
+  useEffect(() => {
+    loadFarms();
+  }, []);
+
+  const loadFarms = async () => {
+    try {
+      setLoading(true);
+      const response = await ApiService.getFarms();
+      if (response.success) {
+        setFarms(response.farms);
+      }
+    } catch (error) {
+      console.error('Error loading farms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddFarm = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await ApiService.createFarm(formData);
+      if (response.success) {
+        await loadFarms();
+        setShowAddForm(false);
+        setFormData({
+          name: '',
+          location: '',
+          area_hectares: '',
+          crop_type: '',
+          soil_type: '',
+          irrigation_type: ''
+        });
+        alert('Farm added successfully!');
+      }
+    } catch (error) {
+      console.error('Error adding farm:', error);
+      alert('Error adding farm: ' + error.message);
+    }
+  };
+
+  const handleUpdateFarm = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await ApiService.updateFarm(editingFarm.id, formData);
+      if (response.success) {
+        await loadFarms();
+        setEditingFarm(null);
+        setFormData({
+          name: '',
+          location: '',
+          area_hectares: '',
+          crop_type: '',
+          soil_type: '',
+          irrigation_type: ''
+        });
+        alert('Farm updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating farm:', error);
+      alert('Error updating farm: ' + error.message);
+    }
+  };
+
+  const handleDeleteFarm = async (farmId) => {
+    if (window.confirm('Are you sure you want to delete this farm?')) {
+      try {
+        const response = await ApiService.deleteFarm(farmId);
+        if (response.success) {
+          await loadFarms();
+          alert('Farm deleted successfully!');
+        }
+      } catch (error) {
+        console.error('Error deleting farm:', error);
+        alert('Error deleting farm: ' + error.message);
+      }
+    }
+  };
+
+  const startEdit = (farm) => {
+    setEditingFarm(farm);
+    setFormData({
+      name: farm.name,
+      location: farm.location,
+      area_hectares: farm.area_hectares,
+      crop_type: farm.crop_type || '',
+      soil_type: farm.soil_type || '',
+      irrigation_type: farm.irrigation_type || ''
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingFarm(null);
+    setShowAddForm(false);
+    setFormData({
+      name: '',
+      location: '',
+      area_hectares: '',
+      crop_type: '',
+      soil_type: '',
+      irrigation_type: ''
+    });
+  };
 
   const filteredFarms = farms.filter(farm => {
     const matchesSearch = farm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,18 +131,22 @@ const Farms = () => {
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'Active': return 'bg-green-100 text-green-800';
-      case 'Planning': return 'bg-yellow-100 text-yellow-800';
-      case 'Harvested': return 'bg-gray-100 text-gray-800';
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'planning': return 'bg-yellow-100 text-yellow-800';
+      case 'harvested': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getEfficiencyColor = (efficiency) => {
-    if (efficiency > 0.8) return 'text-green-600';
-    if (efficiency > 0.6) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -74,11 +156,123 @@ const Farms = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Farms</h1>
           <p className="text-gray-600">Manage and monitor all your agricultural properties</p>
         </div>
-        <button className="btn-primary flex items-center space-x-2">
+        <button 
+          onClick={() => setShowAddForm(true)}
+          className="btn-primary flex items-center space-x-2"
+        >
           <Plus size={20} />
           <span>Add New Farm</span>
         </button>
       </div>
+
+      {/* Add/Edit Farm Form */}
+      {(showAddForm || editingFarm) && (
+        <div className="card mb-6">
+          <h2 className="text-xl font-semibold mb-4">
+            {editingFarm ? 'Edit Farm' : 'Add New Farm'}
+          </h2>
+          <form onSubmit={editingFarm ? handleUpdateFarm : handleAddFarm}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Enter farm name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Enter farm location"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Area (hectares)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.area_hectares}
+                  onChange={(e) => setFormData({...formData, area_hectares: parseFloat(e.target.value)})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Enter farm area in hectares"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Crop Type</label>
+                <select
+                  value={formData.crop_type}
+                  onChange={(e) => setFormData({...formData, crop_type: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select crop type</option>
+                  <option value="Wheat">Wheat</option>
+                  <option value="Rice">Rice</option>
+                  <option value="Maize">Maize</option>
+                  <option value="Cotton">Cotton</option>
+                  <option value="Sugarcane">Sugarcane</option>
+                  <option value="Potato">Potato</option>
+                  <option value="Tomato">Tomato</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Soil Type</label>
+                <select
+                  value={formData.soil_type}
+                  onChange={(e) => setFormData({...formData, soil_type: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select soil type</option>
+                  <option value="Clay">Clay</option>
+                  <option value="Sandy">Sandy</option>
+                  <option value="Silt">Silt</option>
+                  <option value="Loamy">Loamy</option>
+                  <option value="Peaty">Peaty</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Irrigation Type</label>
+                <select
+                  value={formData.irrigation_type}
+                  onChange={(e) => setFormData({...formData, irrigation_type: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select irrigation type</option>
+                  <option value="Canal">Canal</option>
+                  <option value="Rainfed">Rain-fed</option>
+                  <option value="Drip">Drip</option>
+                  <option value="Sprinkler">Sprinkler</option>
+                  <option value="Flood">Flood</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-primary"
+              >
+                {editingFarm ? 'Update Farm' : 'Add Farm'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="card mb-6">
@@ -103,9 +297,9 @@ const Farms = () => {
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">All Status</option>
-              <option value="Active">Active</option>
-              <option value="Planning">Planning</option>
-              <option value="Harvested">Harvested</option>
+              <option value="active">Active</option>
+              <option value="planning">Planning</option>
+              <option value="harvested">Harvested</option>
             </select>
           </div>
         </div>
@@ -125,7 +319,7 @@ const Farms = () => {
                 </div>
               </div>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(farm.status)}`}>
-                {farm.status}
+                {farm.status || 'active'}
               </span>
             </div>
 
@@ -133,67 +327,67 @@ const Farms = () => {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Area:</span>
-                <span className="font-medium">{farm.area} hectares</span>
+                <span className="font-medium">{farm.area_hectares} hectares</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Crop:</span>
-                <span className="font-medium">{farm.crop}</span>
+                <span className="font-medium">{farm.crop_type || 'Not specified'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Efficiency:</span>
-                <span className={`font-medium ${getEfficiencyColor(farm.efficiency)}`}>
-                  {(farm.efficiency * 100).toFixed(0)}%
-                </span>
+                <span className="text-sm text-gray-600">Soil:</span>
+                <span className="font-medium">{farm.soil_type || 'Not specified'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Expected Yield:</span>
-                <span className="font-medium">{farm.expectedYield} tons/ha</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Expected Revenue:</span>
-                <span className="font-medium text-green-600">
-                  EGP {farm.expectedRevenue.toLocaleString()}
-                </span>
+                <span className="text-sm text-gray-600">Irrigation:</span>
+                <span className="font-medium">{farm.irrigation_type || 'Not specified'}</span>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
-              <button className="flex-1 px-3 py-2 bg-primary text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
-                View Details
+              <button 
+                onClick={() => startEdit(farm)}
+                className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center"
+              >
+                <Edit size={16} className="mr-1" />
+                Edit
               </button>
-              <button className="flex-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
-                Run Analysis
+              <button 
+                onClick={() => window.location.href = `/add-farm?farm_id=${farm.id}`}
+                className="flex-1 px-3 py-2 bg-primary text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+              >
+                <Eye size={16} className="mr-1" />
+                Analyze
               </button>
-            </div>
-
-            {/* Last Analysis */}
-            <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between text-sm">
-              <div className="flex items-center space-x-1 text-gray-600">
-                <Calendar size={16} />
-                <span>Last Analysis</span>
-              </div>
-              <span className="text-gray-900">{farm.lastAnalysis}</span>
+              <button 
+                onClick={() => handleDeleteFarm(farm.id)}
+                className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           </div>
         ))}
       </div>
 
       {/* Empty State */}
-      {filteredFarms.length === 0 && (
+      {filteredFarms.length === 0 && !loading && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
             <MapPin size={32} className="text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No farms found</h3>
           <p className="text-gray-600 mb-4">
-            {searchTerm || filterStatus !== 'all' 
+            {searchTerm || filterStatus !== 'all'
               ? 'Try adjusting your search or filters'
               : 'Get started by adding your first farm'
             }
           </p>
-          {(!searchTerm && filterStatus === 'all') && (
-            <button className="btn-primary">
+          {!searchTerm && filterStatus === 'all' && (
+            <button 
+              onClick={() => setShowAddForm(true)}
+              className="btn-primary"
+            >
               <Plus size={20} className="inline mr-2" />
               Add Your First Farm
             </button>
@@ -204,4 +398,4 @@ const Farms = () => {
   );
 };
 
-export default Farms;
+export default FarmsDynamic;

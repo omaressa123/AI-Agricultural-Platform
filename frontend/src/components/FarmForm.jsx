@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Droplets, Thermometer, Cloud, MapPin, Calculator } from 'lucide-react';
 
-const FarmForm = ({ onPredictionChange }) => {
+const FarmForm = ({ onPredictionChange, farmId }) => {
   const [formData, setFormData] = useState({
     // Soil & Crop
     soilType: 'clay',
@@ -22,43 +22,69 @@ const FarmForm = ({ onPredictionChange }) => {
     waterUsage: 1000,
   });
 
-  const [predictions, setPredictions] = useState({
-    yield: 23.4,
-    revenue: 198900,
-    efficiency: 0.82,
-  });
-
-  useEffect(() => {
-    // Simple prediction calculation based on form data
-    const calculatePredictions = () => {
-      const baseYield = 20;
-      const phFactor = formData.ph >= 6 && formData.ph <= 7.5 ? 1.2 : 0.9;
-      const npkFactor = (formData.nitrogen + formData.phosphorus + formData.potassium) / 120;
-      const weatherFactor = formData.temperature >= 20 && formData.temperature <= 30 ? 1.1 : 0.95;
-      const waterFactor = formData.waterUsage / formData.farmArea >= 80 && formData.waterUsage / formData.farmArea <= 120 ? 1.0 : 0.9;
-      
-      const predictedYield = baseYield * phFactor * npkFactor * weatherFactor * waterFactor;
-      const predictedRevenue = predictedYield * 8500; // Base price per ton
-      const efficiency = Math.min(0.95, (predictedYield / 25) * 0.82);
-
-      const newPredictions = {
-        yield: predictedYield,
-        revenue: Math.round(predictedRevenue),
-        efficiency: efficiency,
-      };
-
-      setPredictions(newPredictions);
-      onPredictionChange?.(newPredictions);
-    };
-
-    calculatePredictions();
-  }, [formData, onPredictionChange]);
+  const [predictions, setPredictions] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const runPrediction = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Prepare data for API
+      const requestData = {
+        temperature: formData.temperature,
+        humidity: formData.humidity,
+        ph: formData.ph,
+        rainfall: formData.rainfall,
+        farm_area: formData.farmArea,
+        fertilizer_used: formData.fertilizerUsed,
+        pesticide_used: formData.pesticideUsed,
+        water_usage: formData.waterUsage,
+        N: formData.nitrogen,
+        P: formData.phosphorus,
+        K: formData.potassium,
+        farm_id: farmId
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        const predictionData = {
+          recommendedCrop: result.data.recommended_crop,
+          yield: result.data.predicted_yield,
+          revenue: result.data.predicted_revenue,
+          efficiency: result.data.efficiency_score,
+          confidence: result.data.crop_confidence,
+          predictionId: result.data.prediction_id
+        };
+
+        setPredictions(predictionData);
+        onPredictionChange?.(predictionData);
+      } else {
+        setError(result.message || 'Prediction failed');
+      }
+    } catch (err) {
+      setError('Error connecting to prediction service');
+      console.error('Prediction error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -253,10 +279,46 @@ const FarmForm = ({ onPredictionChange }) => {
         </div>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
       {/* Submit Button */}
-      <button className="btn-primary w-full text-lg py-4">
-        🚀 Run AI Analysis
+      <button 
+        onClick={runPrediction}
+        disabled={loading}
+        className="btn-primary w-full text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? '� Running AI Analysis...' : '�🚀 Run AI Analysis'}
       </button>
+
+      {/* Results Display */}
+      {predictions && (
+        <div className="card bg-green-50 border-green-200">
+          <h3 className="text-lg font-semibold mb-4 text-green-800">🎯 Prediction Results</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <span className="font-medium text-green-700">Recommended Crop:</span>
+              <span className="ml-2 text-green-900">{predictions.recommendedCrop}</span>
+            </div>
+            <div>
+              <span className="font-medium text-green-700">Expected Yield:</span>
+              <span className="ml-2 text-green-900">{predictions.yield.toFixed(1)} tons/hectare</span>
+            </div>
+            <div>
+              <span className="font-medium text-green-700">Expected Revenue:</span>
+              <span className="ml-2 text-green-900">EGP {predictions.revenue.toLocaleString()}</span>
+            </div>
+            <div>
+              <span className="font-medium text-green-700">Efficiency Score:</span>
+              <span className="ml-2 text-green-900">{(predictions.efficiency * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

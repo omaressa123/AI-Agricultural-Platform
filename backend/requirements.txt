@@ -4,7 +4,7 @@ Flask-CORS==4.0.0
 
 # Data Processing
 pandas
-numpy
+numpy<2.0
 
 # Machine Learning
 scikit-learn

@@ -39,7 +39,7 @@ class MarketPriceService:
         except Exception as e:
             print(f"⚠️ Could not load market price data: {e}")
             # Create fallback data
-            self.price_data = self._create_fallback_data()
+            self.price_data = self._create_sample_data()
     
     def _create_sample_data(self):
         """Create sample price data when real data is not available"""

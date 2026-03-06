@@ -15,7 +15,7 @@ const InsightsPanel = ({ farmId }) => {
   const fetchInsights = async (farmId) => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/farms/${farmId}/predictions`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/farms/${farmId}/predictions`);
       const result = await response.json();
       
       if (result.status === 'success') {

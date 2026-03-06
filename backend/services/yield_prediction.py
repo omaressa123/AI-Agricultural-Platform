@@ -4,6 +4,7 @@ import joblib
 import os
 from typing import Dict, List, Any
 import shap
+from config import get_config
 
 class YieldPredictionService:
     def __init__(self):
@@ -21,7 +22,8 @@ class YieldPredictionService:
     def load_model(self):
         """Load the trained yield prediction pipeline"""
         try:
-            model_path = os.path.join(os.path.dirname(__file__), '..', '..', 'model', 'yield_prediction_pipeline.pkl')
+            config = get_config()
+            model_path = config.YIELD_PREDICTION_MODEL
             
             # Try to load with joblib
             self.pipeline = joblib.load(model_path)

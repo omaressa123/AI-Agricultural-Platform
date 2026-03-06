@@ -5,3 +5,8 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+FROM alpine
+WORKDIR /build
+COPY --from=build /app/dist /build
+CMD ["tail", "-f", "/dev/null"]
+

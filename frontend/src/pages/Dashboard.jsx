@@ -27,7 +27,7 @@ const Dashboard = () => {
 
   const fetchFarms = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/farms`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/farms`);
       const result = await response.json();
       
       if (result.status === 'success') {
@@ -49,7 +49,7 @@ const Dashboard = () => {
   const fetchDashboardData = async (farmId) => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/dashboard/${farmId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/dashboard/${farmId}`);
       const result = await response.json();
       
       if (result.status === 'success') {

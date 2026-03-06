@@ -54,7 +54,7 @@ const FarmForm = ({ onPredictionChange, farmId }) => {
         farm_id: farmId
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/predict`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

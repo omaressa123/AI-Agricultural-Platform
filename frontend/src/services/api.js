@@ -6,7 +6,7 @@ class ApiService {
   // Farm Management
   static async getFarms() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms`);
+      const response = await fetch(`${API_BASE_URL}/farms`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching farms:', error);
@@ -16,7 +16,7 @@ class ApiService {
 
   static async createFarm(farmData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms`, {
+      const response = await fetch(`${API_BASE_URL}/farms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ class ApiService {
 
   static async updateFarm(farmId, farmData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}`, {
+      const response = await fetch(`${API_BASE_URL}/farms/${farmId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ class ApiService {
 
   static async deleteFarm(farmId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}`, {
+      const response = await fetch(`${API_BASE_URL}/farms/${farmId}`, {
         method: 'DELETE',
       });
       return await response.json();
@@ -78,7 +78,7 @@ class ApiService {
   // Market Data
   static async getMarketPrices(crop = 'wheat') {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/market-prices?crop=${crop}`);
+      const response = await fetch(`${API_BASE_URL}/api/market-price?crop=${crop}`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching market prices:', error);
@@ -89,7 +89,7 @@ class ApiService {
   // Analytics
   static async getFarmAnalytics(farmId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}/analytics`);
+      const response = await fetch(`${API_BASE_URL}/farms/${farmId}/predictions`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching farm analytics:', error);
@@ -99,7 +99,7 @@ class ApiService {
 
   static async getYieldImpactFactors(farmId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}/yield-factors`);
+      const response = await fetch(`${API_BASE_URL}/farms/${farmId}/predictions`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching yield factors:', error);
@@ -110,7 +110,7 @@ class ApiService {
   // Insights
   static async getAIInsights(farmId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/farms/${farmId}/insights`);
+      const response = await fetch(`${API_BASE_URL}/farms/${farmId}/predictions`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching AI insights:', error);

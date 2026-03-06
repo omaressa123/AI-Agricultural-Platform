@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from config import get_config
 
 class MarketPriceService:
     def __init__(self):
@@ -32,7 +33,8 @@ class MarketPriceService:
     def load_price_data(self):
         """Load market price data"""
         try:
-            data_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'egypt_local_crop_prices_2023_2025.csv')
+            config = get_config()
+            data_path = config.MARKET_PRICE_DATA
             self.price_data = pd.read_csv(data_path)
             self.price_data['Date'] = pd.to_datetime(self.price_data['Date'])
             print("✅ Market price data loaded successfully")

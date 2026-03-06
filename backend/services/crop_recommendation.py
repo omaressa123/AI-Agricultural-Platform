@@ -3,6 +3,7 @@ import numpy as np
 import joblib
 import os
 from typing import Dict, List, Tuple
+from config import get_config
 
 class CropRecommendationService:
     def __init__(self):
@@ -20,7 +21,8 @@ class CropRecommendationService:
     def load_model(self):
         """Load the trained crop recommendation model"""
         try:
-            model_path = os.path.join(os.path.dirname(__file__), '..', '..', 'model', 'crop_recommendation_model.pkl')
+            config = get_config()
+            model_path = config.CROP_RECOMMENDATION_MODEL
             self.model = joblib.load(model_path)
             print("✅ Crop recommendation model loaded successfully")
         except Exception as e:

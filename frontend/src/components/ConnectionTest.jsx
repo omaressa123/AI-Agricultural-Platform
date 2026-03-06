@@ -12,7 +12,7 @@ const ConnectionTest = () => {
   const testConnection = async () => {
     try {
       // Test basic API health check
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/`);
       const data = await response.json();
       
       setApiResponse(data);
@@ -31,7 +31,7 @@ const ConnectionTest = () => {
         <div className="p-4 bg-gray-50 rounded-lg">
           <p className="font-semibold">Status: {status}</p>
           <p className="text-sm text-gray-600 mt-1">
-            API URL: {import.meta.env.VITE_API_URL || 'http://localhost:5000'}
+            API URL: {import.meta.env.VITE_API_URL || ''}
           </p>
         </div>
 
